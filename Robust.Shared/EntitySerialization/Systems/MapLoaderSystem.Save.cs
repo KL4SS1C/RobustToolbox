@@ -128,6 +128,12 @@ public sealed partial class MapLoaderSystem
     /// </summary>
     public bool TrySaveMap(EntityUid map, ResPath target, SerializationOptions? options = null)
     {
+        // Let content save linked map documents before opening/truncating the destination.
+        var saveEvent = new MapSaveToPathEvent(map, target, options);
+        RaiseLocalEvent(saveEvent);
+        if (saveEvent.Handled)
+            return saveEvent.Success;
+
         using var writer = GetWriterForPath(target);
         return TrySaveMap(map, writer, options);
     }
@@ -391,3 +397,5 @@ public sealed partial class MapLoaderSystem
         return true;
     }
 }
+
+
